@@ -74,12 +74,12 @@ generics you need to cast the result you get back as an interface to your expect
 call this is up to you.
 
 ```go
-    result, err := handler.Handle(createAccount{UserID: 1})
-	if len(err) == 0 {
-		acr := result.(accountCreated)
-		accountCreatedResult = &acr
-	}
-	errors = err
+result, err := handler.Handle(createAccount{UserID: 1})
+if len(err) == 0 {
+    acr := result.(accountCreated)
+    accountCreatedResult = &acr
+}
+errors = err
 ```
 
 ## Further reading
