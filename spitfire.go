@@ -6,12 +6,12 @@ import (
 	"log"
 )
 
-type commandHandler struct {
+type commandAndQueryHandler struct {
 	handlers map[string]func(interface{}) (interface{}, error)
 	l        *log.Logger
 }
 
-func (cH *commandHandler) Register(command interface{}, handler func(interface{}) (interface{}, error)) {
+func (cH *commandAndQueryHandler) Register(command interface{}, handler func(interface{}) (interface{}, error)) {
 	if cH.handlers == nil {
 		cH.handlers = make(map[string]func(interface{}) (interface{}, error))
 	}
@@ -19,7 +19,7 @@ func (cH *commandHandler) Register(command interface{}, handler func(interface{}
 	cH.handlers[key] = handler
 }
 
-func (cH *commandHandler) Handle(command interface{}) (interface{}, error) {
+func (cH *commandAndQueryHandler) Handle(command interface{}) (interface{}, error) {
 	var key = fmt.Sprintf("%T", command)
 	handler, ok := cH.handlers[key]
 	if !ok {
@@ -76,29 +76,38 @@ func (eH *eventHandler) Handle(event interface{}) []error {
 // Handler is used to register handlers and receives commands, events and queries then routes them to appropriate handlers
 type Handler struct {
 	eventHandler   *eventHandler
-	commandHandler *commandHandler
+	commandHandler *commandAndQueryHandler
 }
+
+// EventHandler is a function that can handle a given event
+type EventHandler = func(interface{}) error
+
+// QueryHandler is a function that can handle a given query
+type QueryHandler = func(interface{}) (interface{}, error)
+
+// CommandHandler is a function that can handle a given command
+type CommandHandler = func(interface{}) (interface{}, error)
 
 // New sets up the handler and its dependencies
 func New(l *log.Logger) *Handler {
 	eH := &eventHandler{l: l}
-	cH := &commandHandler{l: l}
+	cH := &commandAndQueryHandler{l: l}
 	h := &Handler{eventHandler: eH, commandHandler: cH}
 	return h
 }
 
 // RegisterEventHandler takes in an event and a function to handle that command
-func (h *Handler) RegisterEventHandler(event interface{}, handler func(interface{}) error) {
+func (h *Handler) RegisterEventHandler(event interface{}, handler EventHandler) {
 	h.eventHandler.Register(event, handler)
 }
 
 // RegisterCommandHandler takes in a command and a function to handle that command
-func (h *Handler) RegisterCommandHandler(command interface{}, handler func(interface{}) (interface{}, error)) {
+func (h *Handler) RegisterCommandHandler(command interface{}, handler CommandHandler) {
 	h.commandHandler.Register(command, handler)
 }
 
 // RegisterQueryHandler takes in a query and a function to handle that command
-func (h *Handler) RegisterQueryHandler(command interface{}, handler func(interface{}) (interface{}, error)) {
+func (h *Handler) RegisterQueryHandler(command interface{}, handler QueryHandler) {
 	h.commandHandler.Register(command, handler)
 }
 
