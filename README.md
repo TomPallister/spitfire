@@ -37,21 +37,21 @@ handler.RegisterCommandHandler(createAccount{}, createAccountHandler)
 Command handlers have the following interface
 
 ```go
-    type CommandHandler = func(interface{}) (interface{}, error)
+type CommandHandler = func(interface{}) (interface{}, error)
 ```
 
 ## Events
 Each event can have multiple handlers. Register event handlers like below
 
 ```go
-    handler.RegisterEventHandler(accountCreated{}, incrementAccountCreatedCount)
-	handler.RegisterEventHandler(accountCreated{}, addAccountToCache)
+handler.RegisterEventHandler(accountCreated{}, incrementAccountCreatedCount)
+handler.RegisterEventHandler(accountCreated{}, addAccountToCache)
 ```
 
 Event handlers have the following interface
 
 ```go
-    type EventHandler = func(interface{}) error
+type EventHandler = func(interface{}) error
 ```
 
 ## Queries 
@@ -64,7 +64,7 @@ handler.RegisterQueryHandler(getAccount{}, getAccountHandler)
 Query handlers have the following interface
 
 ```go
-    type QueryHandler = func(interface{}) (interface{}, error)
+type QueryHandler = func(interface{}) (interface{}, error)
 ```
 
 ## Calling the handlers
