@@ -53,12 +53,12 @@ func (eH *eventHandler) Register(event interface{}, handler func(interface{}) er
 	}
 }
 
-func (eH *eventHandler) Handle(event interface{}) (interface{}, []error) {
+func (eH *eventHandler) Handle(event interface{}) []error {
 	var key = fmt.Sprintf("%T", event)
 	handlers, ok := eH.handlers[key]
 	if !ok {
 		eH.l.Printf("could not find event handler for %T\n", event)
-		return event, nil
+		return nil
 	}
 
 	errors := make([]error, 0)
@@ -70,10 +70,10 @@ func (eH *eventHandler) Handle(event interface{}) (interface{}, []error) {
 		}
 	}
 
-	return nil, errors
+	return errors
 }
 
-// Handler injests commands, events and queries then routes them to appropriate handlers
+// Handler is used to register handlers and receives commands, events and queries then routes them to appropriate handlers
 type Handler struct {
 	eventHandler   *eventHandler
 	commandHandler *commandHandler
@@ -87,29 +87,30 @@ func New(l *log.Logger) *Handler {
 	return h
 }
 
-// RegisterEventHandler does what it says on the tin
+// RegisterEventHandler takes in an event and a function to handle that command
 func (h *Handler) RegisterEventHandler(event interface{}, handler func(interface{}) error) {
 	h.eventHandler.Register(event, handler)
 }
 
-// RegisterCommandHandler does what it says on the tin
+// RegisterCommandHandler takes in a command and a function to handle that command
 func (h *Handler) RegisterCommandHandler(command interface{}, handler func(interface{}) (interface{}, error)) {
 	h.commandHandler.Register(command, handler)
 }
 
-// RegisterQueryHandler does what it says on the tin
+// RegisterQueryHandler takes in a query and a function to handle that command
 func (h *Handler) RegisterQueryHandler(command interface{}, handler func(interface{}) (interface{}, error)) {
 	h.commandHandler.Register(command, handler)
 }
 
-// Handle does what it says on the tin
-func (h *Handler) Handle(command interface{}) (interface{}, []error) {
-	result, err := h.commandHandler.Handle(command)
+// Handle receives a message and calls handlers for that message type and any subsequent events it generates
+// It will return the command or query handler result to the caller and an array of any detected errors
+func (h *Handler) Handle(message interface{}) (interface{}, []error) {
+	result, err := h.commandHandler.Handle(message)
 	if err != nil {
 		return nil, []error{err}
 	}
 
-	_, errs := h.eventHandler.Handle(result)
+	errs := h.eventHandler.Handle(result)
 	if len(errs) > 0 {
 		return nil, errs
 	}
