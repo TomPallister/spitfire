@@ -31,7 +31,7 @@ A message is a command, query or event and these can in theory be any struct but
 Each command can only have one handler. Register a command handler like below
 
 ```go
-	handler.RegisterCommandHandler(createAccount{}, createAccountHandler)
+handler.RegisterCommandHandler(createAccount{}, createAccountHandler)
 ```
 
 Command handlers have the following interface
@@ -58,7 +58,7 @@ Event handlers have the following interface
 Each query can only have one handler. Register a query handler like below
 
 ```go
-	handler.RegisterQueryHandler(getAccount{}, getAccountHandler)
+handler.RegisterQueryHandler(getAccount{}, getAccountHandler)
 ```
 
 Query handlers have the following interface
